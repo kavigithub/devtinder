@@ -1,63 +1,41 @@
 const express = require("express");
+const connectDB = require("./config/database");
 
-const app = express();
+const app = express(); //create web server
+const Users = require("./models/users");
 
-//import router file
-//const multipleRouter = require("./multiple-routes-handlers");
-//app.use(multipleRouter);
+//to read this req.body we need to use middleware express.json
+app.use(express.json());
 
-//import
-const { adminAuth, userAuth } = require("./middleware/auth");
+//this is how we push or send data to server and save it in db
+app.post("/signup", async (req, res) => {
+  //create new instance of the User Model
+  /*   const user = new Users({
+    firstName: "kavita",
+    lastName: "ghatge",
+    emailId: "kavi@.gamil.com",
+    gender: "female",
+  }); */
 
-app.use("/admin", adminAuth);
+  console.log(req.body);
+  const user = new Users(req.body);
 
-app.get("/admin/getAllData", (req, res) => {
-  res.send("All data send");
+  try {
+    await user.save();
+    res.send("User added Successfully");
+  } catch (error) {
+    console.error("Error Saving Users", error.message);
+    res.status(500).send("failed to add user");
+  }
 });
 
-app.get("/admin/deleteUser", (req, res) => {
-  res.send("deleted User");
-});
-
-app.use("/test", (req, res) => {
-  res.send("hey i m from test router");
-});
-
-//check middleware userAuth
-app.get("/users", userAuth, (req, res) => {
-  console.log(req.query);
-  const id = req.query.id;
-  const name = req.query.name;
-  console.log("id", id);
-  console.log("name", name);
-  res.send({
-    firstName: "Kavita",
-    lastName: "Ghatge",
-    title: "UI Engineer",
+connectDB()
+  .then(() => {
+    console.log("Cluster connect for Databse Connection Establish Kavita");
+  })
+  .catch((err) => {
+    console.error("Lost DB Connection", err.message);
   });
-});
 
-app.get("/products/:id/:name", (req, res) => {
-  const price = req.query.price;
-  const brand = req.query.brand;
-  console.log(req.params);
-  console.log(req.params.name);
-  res.send(price);
-  //res.send("done");
-});
-
-app.post("/users", (req, res) => {
-  res.send("Data scccessfully saved in DB");
-});
-
-app.delete("/users", (req, res) => {
-  res.send("Data successfully deleted from DB");
-});
-
-app.patch("/users", (req, res) => {
-  res.send({
-    firstName: "Harsha",
-  });
-});
-
-app.listen(3000);
+//listen server
+app.listen(3000, () => console.log("server running on PORT:3000"));

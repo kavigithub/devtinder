@@ -20,7 +20,22 @@ const userAuth = (req, res, next) => {
   }
 };
 
+const userAuthLogin = (req, res, next) => {
+  if (req.headers.authorization === "USER") {
+    next();
+  } else {
+    res.status(401).send("authentication required");
+  }
+};
+
+const logger = (req, res, next) => {
+  console.log("Request received");
+  next();
+};
+
 module.exports = {
   adminAuth,
   userAuth,
+  logger,
+  userAuthLogin,
 };
